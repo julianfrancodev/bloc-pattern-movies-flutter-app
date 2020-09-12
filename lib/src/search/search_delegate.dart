@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_03/src/models/movie_model.dart';
+import 'package:flutter_03/src/providers/movies_provider.dart';
 
 class DataSearch extends SearchDelegate {
+  
+  final moviesProvider = new MoviesProvider();
 
   String selection = '';
 
@@ -55,28 +59,75 @@ class DataSearch extends SearchDelegate {
     );
   }
 
+  // @override
+  // Widget buildSuggestions(BuildContext context) {
+  //   // TODO: son las sugerencias cuando esta tipiando
+  //
+  //   final suggestList = (query.isEmpty)
+  //       ? recentMovies
+  //       : movies
+  //           .where((m) => m.toLowerCase().startsWith(query.toLowerCase()))
+  //           .toList();
+  //
+  //   return ListView.builder(
+  //     itemCount: suggestList.length,
+  //     itemBuilder: (context, index) {
+  //       return ListTile(
+  //         leading: Icon(Icons.movie),
+  //         title: Text(suggestList[index]),
+  //         onTap: () {
+  //           selection = suggestList[index];
+  //           showResults(context);
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
   @override
   Widget buildSuggestions(BuildContext context) {
     // TODO: son las sugerencias cuando esta tipiando
 
-    final suggestList = (query.isEmpty)
-        ? recentMovies
-        : movies
-            .where((m) => m.toLowerCase().startsWith(query.toLowerCase()))
-            .toList();
+    if(query.isEmpty){
+      return Container();
+    }
 
-    return ListView.builder(
-      itemCount: suggestList.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-          leading: Icon(Icons.movie),
-          title: Text(suggestList[index]),
-          onTap: () {
-            selection = suggestList[index];
-            showResults(context);
-          },
-        );
+    return FutureBuilder(
+      future:  moviesProvider.searchMovie(query),
+      initialData: <Movie>[],
+      builder: (BuildContext context, AsyncSnapshot<List<Movie>> snapshot){
+        if(snapshot.hasData){
+
+          final movies = snapshot.data;
+
+          return ListView(
+
+            children: movies.map((movie){
+              return ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: FadeInImage(
+                    image: NetworkImage(movie.getPosterImg()),
+                    placeholder: AssetImage('assets/images/jar-loading.gif'),
+                    width: 50,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                title: Text(movie.title),
+                subtitle: Text(movie.originalTitle),
+                onTap: (){
+                  close(context, null);
+                  movie.uniqueId = '';
+                  Navigator.pushNamed(context, '/detail',arguments: movie);
+                },
+              );
+            }).toList()
+          );
+        }else{
+          return Container();
+        }
       },
     );
+
   }
 }

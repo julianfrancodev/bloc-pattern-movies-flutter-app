@@ -66,12 +66,16 @@ class Movie {
   getPosterImg() {
     if (posterPath != null) {
       return 'https://image.tmdb.org/t/p/w500/${posterPath}';
+    }else{
+      return 'https://linube.com/blog/wp-content/uploads/error-404.jpg';
     }
   }
 
   getBackgroundImg() {
     if (posterPath != null) {
       return 'https://image.tmdb.org/t/p/w500/${backdropPath}';
+    }else{
+      return 'https://linube.com/blog/wp-content/uploads/error-404.jpg';
     }
   }
 }
